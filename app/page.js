@@ -1,95 +1,63 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { Box, Stack, Typography } from "@mui/material";
+
+const items = ['tomato', 'potato', 'onion', 'garlic', 'ginger', 'chicken', 'beef', 'pork', 'fish', 'milk', 'egg', 'butter', 'cheese', 'yogurt', 'bread', 'rice', 'pasta', 'flour', 'sugar', 'salt', 'pepper', 'oil', 'vinegar', 'soy sauce', 'ketchup', 'mustard', 'mayonnaise', 'honey', 'jam', 'peanut butter', 'coffee', 'tea', 'juice', 'soda', 'beer', 'wine', 'whiskey', 'vodka']
+
 
 export default function Home() {
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
+    <Box 
+      width="100vw" 
+      height="100vh"
+      display={"flex"}
+      justifyContent={'center'}
+      alignItems={'center'}  
+      flexDirection={'column'}
+    >
+      <Box 
+        width={'800px'} 
+        height={'100px'} 
+        bgcolor={"#89CFF0"} 
+        display={'flex'} 
+        justifyContent={'center'} 
+        alignContent={'center'}
+        border={'1px solid #333'}
+      >
+        <Typography 
+          variant="h2" 
+          color={'#333'} 
+          textAlign={'center'}
         >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          Pantry Items
+        </Typography>
+      </Box>  
+      <Stack 
+        width="800px"
+        height="400px"
+        spacing={2}
+        overflow={'scroll'}
+      >
+        {items.map((i) => (
+          <Box 
+            key={i}
+            width={"100%"}
+            height={"100px"}
+            display={"flex"}
+            justifyContent={'center'}
+            alignItems={'center'}
+            bgcolor={"#f0f0f0"}
+          >  
+            <Typography
+              variant="h3"
+              color={"#333"}
+              textAlign={'center'}
+            >
+              {
+                i.charAt(0).toUpperCase() + i.slice(1)
+              }
+            </Typography>
+          </Box>
+        ))}
+      </Stack>
+    </Box>
   );
 }
