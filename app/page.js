@@ -1,8 +1,9 @@
 'use client'
-import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Modal, Stack, TextField, Typography  } from "@mui/material";
 import { collection, getDocs, getDoc, setDoc, deleteDoc, query, doc} from "@firebase/firestore";
 import { useEffect, useState } from "react";
 import { firestore } from "@/firebase";
+import SearchAppBar from "./Components/SearchAppBar";
 
 const style = {
   position: 'absolute',
@@ -22,10 +23,10 @@ const style = {
 export default function Home() {
   const [pantry, setPantry] = useState([])
   const [open, setOpen] = useState(false);
+  const [Itemname, setItemname] = useState([])
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-  const [Itemname, setItemname] = useState([])
 
   const getItems = async () => {
     const snapshot = query(collection(firestore, 'pantry'))
@@ -37,7 +38,7 @@ export default function Home() {
         ...doc.data(),
       })
     })
-    console.log(pantryList);
+    // console.log(pantryList);
     setPantry(pantryList)
   }
 
@@ -77,84 +78,84 @@ export default function Home() {
   
 
   return (
-    <Box 
-      width="100vw" 
-      height="100vh"
-      display={"flex"}
-      justifyContent={'center'}
-      alignItems={'center'}  
-      flexDirection={'column'}
-      gap={2}
-    > 
-      <Button variant="contained" onClick={handleOpen}>Add</Button>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Add an item
-          </Typography>
-          <Stack width="100%" direction={'row'} spacing={2} >
-            <TextField 
-              id="outlined-basic" 
-              label="Item" 
-              variant="outlined" 
-              fullWidth 
-              value={Itemname}
-              onChange={(e) => setItemname(e.target.value)} />
-            <Button variant="outlined" onClick={() => {
-                addItem(Itemname)
-                setItemname('')
-                handleClose()
-              }}
-            >
-              Add
-            </Button>
+    <Box width="100vw" height="100vh" display={"flex"} justifyContent={'center'} alignItems={'center'} flexDirection={'column'} gap={2} > 
+      <SearchAppBar></SearchAppBar>
+      <Box position='absolute' display="flex" justifyContent="center" alignItems="center" flexDirection='column' gap={2}>
+        <Button variant="contained" onClick={handleOpen}>Add</Button>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Add an item
+            </Typography>
+            <Stack width="100%" direction={'row'} spacing={2} >
+              <TextField 
+                id="outlined-basic" 
+                label="Item" 
+                variant="outlined" 
+                fullWidth 
+                value={Itemname}
+                onChange={(e) => {
+                  const val = e.target.value
+                  setItemname(val.charAt(0).toUpperCase() + val.slice(1))
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    addItem(Itemname)
+                    setItemname('')
+                    handleClose()
+                    console.log('here');
+                    
+                  }
+                }} 
+              />
+              <Button variant="outlined" onClick={() => {
+                  addItem(Itemname)
+                  setItemname('')
+                  handleClose()
+                }}
+              >
+                Add
+              </Button>
+            </Stack>
+          </Box>
+        </Modal>
+
+        
+        <Box border={'1px solid #333'} >
+          <Box width='800px' height='100px' bgcolor="#89CFF0" display='flex' alignItems='center' justifyContent='center' >
+            <Typography variant="h3" color={'#333'} textAlign={'center'} >
+              Inventory Items
+            </Typography>
+          </Box>  
+
+          <Stack width="800px" height="400px" spacing={2} overflow={'scroll'} >
+            {pantry.map((p) => (
+              <Box key={p.name} width="100%" height="100px" display="flex" justifyContent='space-between' alignItems="center" bgcolor="#f0f0f0" paddingX={3} >
+                <Typography variant="h4" color="#333" textAlign='center' gap={5} maxWidth={50} >
+                  {p.name.charAt(0).toUpperCase() + p.name.slice(1)}
+                </Typography>
+                <Typography
+                  variant="h4"
+                  color={"#333"}
+                  textAlign={'left'}
+                >
+                  {p.quantity}
+                </Typography>
+                <Button 
+                  onClick={() => deleteItems(p.name)}
+                  variant="contained"
+                >
+                  Remove
+                </Button>
+              </Box>
+            ))}
           </Stack>
         </Box>
-      </Modal>
-
-      
-      <Box border={'1px solid #333'}>
-        <Box width='800px' height='100px' bgcolor="#89CFF0" display='flex' alignItems='center' justifyContent='center' >
-          <Typography 
-            variant="h3" 
-            color={'#333'} 
-            textAlign={'center'}
-          >
-            Pantry Items
-          </Typography>
-      </Box>  
-        <Stack 
-          width="800px"
-          height="400px"
-          spacing={2}
-          overflow={'scroll'}
-        >
-          {pantry.map((p) => (
-            <Box key={p.name} width="100%" height="70px" display="flex" justifyContent='space-between' alignItems='center' bgcolor="#f0f0f0" paddingX="2" >
-              <Typography variant="h4" color="#333" textAlign='center' >
-                {p.name.charAt(0).toUpperCase() + p.name.slice(1)}
-              </Typography>
-              <Typography
-                variant="h4"
-                color={"#333"}
-                textAlign={'center'}
-              >
-                {p.quantity}
-              </Typography>
-              <Button 
-                onClick={() => deleteItems(p.name)}
-                variant="contained"
-              >
-                Remove
-              </Button>
-            </Box>
-          ))}
-        </Stack>
       </Box>
     </Box>
   );
