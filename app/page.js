@@ -1,6 +1,6 @@
 'use client'
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
-import { collection, getDocs, setDoc, deleteDoc, query, doc,  } from "@firebase/firestore";
+import { collection, getDocs, getDoc, setDoc, deleteDoc, query, doc} from "@firebase/firestore";
 import { useEffect, useState } from "react";
 import { firestore } from "@/firebase";
 
@@ -32,23 +32,41 @@ export default function Home() {
     const docs = await getDocs(snapshot)
     const pantryList = []
     docs.forEach((doc) => {
-      console.log(doc.id);
-      pantryList.push(doc.id)
+      pantryList.push({
+        name: doc.id,
+        ...doc.data(),
+      })
     })
     console.log(pantryList);
     setPantry(pantryList)
   }
 
   const addItem = async (item) => {
-    const pantryref = doc(collection(firestore, "pantry"), item)
-    await setDoc(pantryref, {})
-    getItems()
+    const docRef = doc(collection(firestore, "pantry"), item)
+    const docSnap = await getDoc(docRef)
+
+    if (docSnap.exists()) {
+      const {quantity} = docSnap.data()
+      await setDoc(docRef, {quantity: quantity + 1})
+    } else {
+      await setDoc(docRef, {quantity: 1})
+    }
+    await getItems()
   }
 
   const deleteItems = async (item) => {
-    const delref = doc(collection(firestore, "pantry"), item)
-    await deleteDoc(delref)
-    getItems()
+    const docRef = doc(collection(firestore, "pantry"), item)
+    const docSnap = await getDoc(docRef)
+
+    if (docSnap.exists()) {
+      const {quantity} = docSnap.data()
+      if (quantity === 1) {
+        await deleteDoc(docRef)
+      } else {
+        await setDoc(docRef, { quantity: quantity - 1 })
+      }
+    }
+    await getItems()
   }
 
 
@@ -101,16 +119,9 @@ export default function Home() {
 
       
       <Box border={'1px solid #333'}>
-        <Box 
-          width={'800px'} 
-          height={'100px'} 
-          bgcolor={"#89CFF0"} 
-          display={'flex'} 
-          justifyContent={'center'} 
-          alignContent={'center'} 
-        >
+        <Box width='800px' height='100px' bgcolor="#89CFF0" display='flex' alignItems='center' justifyContent='center' >
           <Typography 
-            variant="h2" 
+            variant="h3" 
             color={'#333'} 
             textAlign={'center'}
           >
@@ -124,27 +135,19 @@ export default function Home() {
           overflow={'scroll'}
         >
           {pantry.map((p) => (
-            <Box 
-              key={p}
-              width={"100%"}
-              height={"70px"}
-              display={"flex"}
-              justifyContent={'space-between'}
-              alignItems={'center'}
-              bgcolor={"#f0f0f0"}
-              paddingX={2}
-            >
+            <Box key={p.name} width="100%" height="70px" display="flex" justifyContent='space-between' alignItems='center' bgcolor="#f0f0f0" paddingX="2" >
+              <Typography variant="h4" color="#333" textAlign='center' >
+                {p.name.charAt(0).toUpperCase() + p.name.slice(1)}
+              </Typography>
               <Typography
-                variant="h3"
+                variant="h4"
                 color={"#333"}
                 textAlign={'center'}
               >
-                {
-                  p.charAt(0).toUpperCase() + p.slice(1)
-                }
+                {p.quantity}
               </Typography>
               <Button 
-                onClick={() => deleteItems(p)}
+                onClick={() => deleteItems(p.name)}
                 variant="contained"
               >
                 Remove
