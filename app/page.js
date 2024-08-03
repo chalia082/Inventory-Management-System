@@ -1,9 +1,14 @@
 'use client'
-import { Box, Button, Modal, Stack, TextField, Typography  } from "@mui/material";
+import { Box, Button, Modal, Stack, TextField, Typography, styled, alpha  } from "@mui/material";
 import { collection, getDocs, getDoc, setDoc, deleteDoc, query, doc} from "@firebase/firestore";
 import { useEffect, useState } from "react";
 import { firestore } from "@/firebase";
-import SearchAppBar from "./Components/SearchAppBar";
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import InputBase from '@mui/material/InputBase';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import AppBar from '@mui/material/AppBar';
 
 const style = {
   position: 'absolute',
@@ -20,10 +25,57 @@ const style = {
   gap: 3
 };
 
+
+
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+      backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(1),
+      width: 'auto',
+  },
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  width: '100%',
+  '& .MuiInputBase-input': {
+  padding: theme.spacing(1, 1, 1, 0),
+  // vertical padding + font size from searchIcon
+  paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+  transition: theme.transitions.create('width'),
+  [theme.breakpoints.up('sm')]: {
+      width: '12ch',
+      '&:focus': {
+          width: '20ch',
+      },
+  },
+  },
+}));
+
 export default function Home() {
-  const [pantry, setPantry] = useState([])
+
+  const [items, setItems] = useState([])
   const [open, setOpen] = useState(false);
   const [Itemname, setItemname] = useState([])
+  const [searchQuery, setSearchQuery]= useState('')
+
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -38,9 +90,12 @@ export default function Home() {
         ...doc.data(),
       })
     })
-    // console.log(pantryList);
-    setPantry(pantryList)
+    setItems(pantryList)
   }
+
+  useEffect(() => {
+    getItems()
+  }, [])
 
   const addItem = async (item) => {
     const docRef = doc(collection(firestore, "pantry"), item)
@@ -71,15 +126,54 @@ export default function Home() {
   }
 
 
-  useEffect(() => {
-    getItems()
-  }, [])
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value)
+  }
 
-  
+  const itemsToShow = items.filter((item) => {
+    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) 
+  }) 
 
   return (
     <Box width="100vw" height="100vh" display={"flex"} justifyContent={'center'} alignItems={'center'} flexDirection={'column'} gap={2} > 
-      <SearchAppBar></SearchAppBar>
+      
+      {/* Search Bar starts */}
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="fixed">
+            <Toolbar>
+            <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                sx={{ mr: 2 }}
+            >
+                {/* <MenuIcon /> */}
+            </IconButton>
+            <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+            >
+                Inventory
+            </Typography>
+            <Search>
+                <SearchIconWrapper>
+                <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                placeholder="Search…"
+                inputProps={{ 'aria-label': 'search' }}
+                value={searchQuery}
+                onChange={handleSearchChange}
+                />
+            </Search>
+            </Toolbar>
+        </AppBar>
+      </Box>
+      {/* Search Bar ends */}
+
       <Box position='absolute' display="flex" justifyContent="center" alignItems="center" flexDirection='column' gap={2}>
         <Button variant="contained" onClick={handleOpen}>Add</Button>
         <Modal
@@ -134,7 +228,7 @@ export default function Home() {
           </Box>  
 
           <Stack width="800px" height="400px" spacing={2} overflow={'scroll'} >
-            {pantry.map((p) => (
+            {itemsToShow.map((p) => (
               <Box key={p.name} width="100%" height="100px" display="flex" justifyContent='space-between' alignItems="center" bgcolor="#f0f0f0" paddingX={3} >
                 <Typography variant="h4" color="#333" textAlign='center' gap={5} maxWidth={50} >
                   {p.name.charAt(0).toUpperCase() + p.name.slice(1)}
