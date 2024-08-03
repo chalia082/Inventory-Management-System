@@ -227,7 +227,7 @@ export default function Home() {
             </Typography>
           </Box>  
 
-          <Stack width="800px" height="400px" spacing={2} overflow={'scroll'} >
+          <Stack width="800px" height="600px" spacing={2} overflow={'scroll'} >
             {itemsToShow.map((p) => (
               <Box key={p.name} width="100%" height="100px" display="flex" justifyContent='space-between' alignItems="center" bgcolor="#f0f0f0" paddingX={3} >
                 <Typography variant="h4" color="#333" textAlign='center' gap={5} maxWidth={50} >
@@ -243,6 +243,7 @@ export default function Home() {
                 <Button 
                   onClick={() => deleteItems(p.name)}
                   variant="contained"
+                  size="small"
                 >
                   Remove
                 </Button>
